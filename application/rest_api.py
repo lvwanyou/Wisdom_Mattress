@@ -9,6 +9,7 @@ from stage_api import Stages
 from statistics_api import Statistics
 from history_api import History
 from nursing_api import NursingAnalyser
+from statisticsForMonth_api import StatisticsForMonth
 
 
 def start():
@@ -21,6 +22,7 @@ def start():
             settings.config['db']['port']))
     app.add_route('/analyser/reports/{user_id}/{date}', Stages(db))
     app.add_route('/analyser/statistics/{user_id}/{date}', Statistics(db))
+    app.add_route('/analyser/statisticsForMonth/{user_id}/{date}', StatisticsForMonth(db))
     app.add_route('/analyser/history/{user_id}/{date}', History(db))
     app.add_route('/analyser/nursing/{user_id}/{date}', NursingAnalyser(db))
     print(datetime.now(), 'Report service started on port', settings.config['rest_api_port'])

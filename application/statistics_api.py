@@ -104,9 +104,9 @@ class Statistics:
                 if input_value >= key[0]:
                     return value
             elif key[0] <= input_value < key[1]:
-                    return value
+                return value
 
-    # 时间均以分钟记录
+    # 时间均以分钟记录     获取date天的评分和评价。
     def get_sleep_assess(self, off_bed_times, first_light_time, awake_time, light_time, deep_time):
         moving_score = 10
 
@@ -148,7 +148,7 @@ class Statistics:
             self.get_assess_level('sleep_efficiency', sleep_efficiency)
 
         score = sleep_time_score + sleep_efficiency_score + first_light_time_score + \
-            deep_sleep_score + off_bed_times_score + moving_score
+                deep_sleep_score + off_bed_times_score + moving_score
 
         score_level = self.get_assess_level('score', score)
         sleep_score_eval = self.assess_text['score'][score_level].format(total=score)
@@ -162,7 +162,7 @@ class Statistics:
     def on_get(self, req, resp, user_id, date):
         data_from_db = self.db.sleep_stat[user_id].find_one({'_id': date})
         if data_from_db is None or data_from_db['ver'] != arith.SLEEP_STAT_ALGORI_VERSION:
-            self.analyser.analyse(user_id, date)
+            self.analyser.analyse(user_id, date)  # analysis 计算date天的睡眠状态数据 和分析数据
             data_from_db = self.db.sleep_stat[user_id].find_one({'_id': date})
         sleep_stat = data_from_db.get('data')
         if sleep_stat is None or sleep_stat['validity'] is False:
