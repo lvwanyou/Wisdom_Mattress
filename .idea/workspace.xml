@@ -15,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/report$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1515564447234" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/report$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1515571192754" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/report$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1514445061711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/settings" />
   </component>
   <component name="FileEditorManager">
@@ -89,7 +89,7 @@
       <file leaf-file-name="statisticsForMonth_api.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/application/statisticsForMonth_api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="383">
+            <state relative-caret-position="452">
               <caret line="76" column="38" lean-forward="true" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
               <folding>
                 <element signature="e#24#37#0" expanded="true" />
@@ -729,7 +729,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/application/statisticsForMonth_api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="383">
+        <state relative-caret-position="452">
           <caret line="76" column="38" lean-forward="true" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
           <folding>
             <element signature="e#24#37#0" expanded="true" />

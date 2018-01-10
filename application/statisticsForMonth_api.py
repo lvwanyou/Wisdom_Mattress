@@ -72,8 +72,6 @@ class StatisticsForMonth:
             node_day = first_day + timedelta(days=i)
             node_day = node_day.strftime('%Y-%m-%d')  # 格式化日期格式
             print (node_day)
-            self.get_day_score(user_id, node_day)
-            # 根据每一天获取每一天的score ，算出平均值，为月报的分数
+
         sleep_stat_mon = {'lv': 'wan'}
-        resp.body = json.dumps(sleep_stat_mon)
         resp.status = falcon.HTTP_200
