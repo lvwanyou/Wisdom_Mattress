@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from dateutil import parser
 
+
 from stage_analyser import StageAnalyser
 import arith
 import dbutil
@@ -33,7 +34,7 @@ class Analyser:
                 while (item['time'] - last_mat_data['time']).seconds > 4:
                     last_mat_data['time'] += timedelta(0, 3)
                     self.stage_analyser.process(mat_data=last_mat_data)
-            self.stage_analyser.process(mat_data=item)
+            self.stage_analyser.process(mat_data=item)  # 将原始数据进行加工，成对应的睡眠状态的数据
             last_mat_data = item.copy()
 
     def get_sleep_stage(self):

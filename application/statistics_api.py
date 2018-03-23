@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 import falcon
 import json
-from datetime import datetime
-
-from analyser import Analyser
 import arith
+
+from application.analysis.stage_regularity_analyser import StageRegularityAnalyser
+from analyser import Analyser
 
 
 class Statistics:
     def __init__(self, db):
         self.db = db
+        self.user_id = None
+        self.date = None
         self.analyser = Analyser(self.db)
+        self.stage_regularity_analyser = StageRegularityAnalyser(self.db)
         self.assess_text = {
             'score': {
                 'best': '恭喜! 您的总体睡眠质量相当不错',
@@ -108,6 +111,7 @@ class Statistics:
 
     # 时间均以分钟记录     获取date天的评分和评价。
     def get_sleep_assess(self, off_bed_times, first_light_time, awake_time, light_time, deep_time):
+        # moving_score 为浮动得分
         moving_score = 10
 
         (off_bed_times_level, off_bed_times_score) = self.get_assess_level('offbed', off_bed_times)
@@ -159,7 +163,8 @@ class Statistics:
 
         return score, sleepEval
 
-    def on_get(self, req, resp, user_id, date):
+    # 获取日报数据
+    def get_sleep_stat(self,resp, user_id, date):
         data_from_db = self.db.sleep_stat[user_id].find_one({'_id': date})
         if data_from_db is None or data_from_db['ver'] != arith.SLEEP_STAT_ALGORI_VERSION:
             self.analyser.analyse(user_id, date)  # analysis 计算date天的睡眠状态数据 和分析数据
@@ -196,6 +201,11 @@ class Statistics:
         if sleep_stat['duration']:
             sleep_stat['duration'][0] = str(sleep_stat['duration'][0])
             sleep_stat['duration'][1] = str(sleep_stat['duration'][1])
+        return sleep_stat
 
+    def on_get(self, req, resp, user_id, date):
+        self.date = date
+        self.user_id = user_id
+        sleep_stat = self.get_sleep_stat(resp, user_id, date)
         resp.body = json.dumps(sleep_stat)
         resp.status = falcon.HTTP_200

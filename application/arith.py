@@ -33,30 +33,46 @@ SLEEP_STAGE_ALGORI_VERSION = 13
 SLEEP_STAT_ALGORI_VERSION = 15
 
 # 睡眠阶段相关参数
-SLEEP_MAX_GAP = 30   # （分钟）合理区间之外的部分，超出该间隔的不计入有效睡眠
+SLEEP_MAX_GAP = 30  # （分钟）合理区间之外的部分，超出该间隔的不计入有效睡眠
 MIN_SLEEP_TIME = 10  # （分钟）最短的睡眠时间，小于该值不认为是睡眠
 SLEEP_SECTION = [20, 6]  # 晚间睡眠的合理区间
 MIN_SLEEP_STAGE_TIME = 5  # （分钟）最短的睡眠阶段，小于该值不认为是一个睡眠阶段（过滤碎片化的睡眠阶段）
 HOURS_BESIDE_SLEEP_SECTION = 2  # 合理睡眠区间之外可能计算进入睡眠的部分，前提是满足SLEEP_MAX_GAP
+MONTH_OFFBED_POINT_TIMES = 3  # 夜间起夜需关注的时间段的个数
+
+# 养老院规律作息时间表（用于作息规律评分标准）//来源于《评价方案8_20》
+WORK_REST_SCHEDULE = {  # 12个状态  //最后一位为weight
+    ('GET_UP', 'OFFBED'): ("06:00", "07:00", 1),
+    ('BREAKFAST', 'OFFBED'): ("07:00", "07:45", 1),
+    ('EXERCISE', 'OFFBED'): ("07:45", "08:30", 1),
+    ('ENTERTAINMENT', 'OFFBED'): ("08:30", "11:00", 1),
+    ('LUNCH', 'OFFBED'): ("11:00", "12:00", 1),
+    ('NOONTIME_SNOOSE', 'ONBED'): ("12:00", "14:00", 1),  # onbed
+    ('SHOWER', 'OFFBED'): ("14:00", "15:00", 1),
+    ('NOON_ENTERTAINMENT', 'OFFBED'): ("15:00", "17:00", 1),
+    ('DINNER', 'OFFBED'): ("17:00", "17:30", 1),
+    ('WASH', 'OFFBED'): ("17:30", "19:30", 1),
+    ('ONBED', 'ONBED'): ("19:30", "20:00", 1),  # onbed
+    ('SLEEP', 'ONBED'): ("20:00", "06:00", 1)  # onbed
+}
 
 # 睡眠状态机相关参数
 SLEEP_PARAMETER = {
     'htjr': {
-        'MOVES_LIGHT_TO_AWAKE': 25,     # 浅睡状态，连续翻身多少次，进入清醒状态
-        'MOVES_DEEP_TO_LIGHT': 3,       # 深睡状态，连续翻身多少次，进入浅睡状态
-        'TIME_AWAKE_TO_LIGHT': 600,     # 清醒状态，连续多少秒静卧，进入浅睡状态
-        'TIME_LIGHT_TO_DEEP': 1080      # 浅睡状态，连续多少秒静卧，进入深睡状态
+        'MOVES_LIGHT_TO_AWAKE': 25,  # 浅睡状态，连续翻身多少次，进入清醒状态
+        'MOVES_DEEP_TO_LIGHT': 3,  # 深睡状态，连续翻身多少次，进入浅睡状态
+        'TIME_AWAKE_TO_LIGHT': 600,  # 清醒状态，连续多少秒静卧，进入浅睡状态
+        'TIME_LIGHT_TO_DEEP': 1080  # 浅睡状态，连续多少秒静卧，进入深睡状态
     },
     'darma': {
-        'MOVES_LIGHT_TO_AWAKE': 30,     # 浅睡状态，连续翻身多少次，进入清醒状态
-        'MOVES_DEEP_TO_LIGHT': 5,       # 深睡状态，连续翻身多少次，进入浅睡状态
-        'TIME_AWAKE_TO_LIGHT': 200,     # 清醒状态，连续多少秒静卧，进入浅睡状态
-        'TIME_LIGHT_TO_DEEP': 350       # 浅睡状态，连续多少秒静卧，进入深睡状态
+        'MOVES_LIGHT_TO_AWAKE': 30,  # 浅睡状态，连续翻身多少次，进入清醒状态
+        'MOVES_DEEP_TO_LIGHT': 5,  # 深睡状态，连续翻身多少次，进入浅睡状态
+        'TIME_AWAKE_TO_LIGHT': 200,  # 清醒状态，连续多少秒静卧，进入浅睡状态
+        'TIME_LIGHT_TO_DEEP': 350  # 浅睡状态，连续多少秒静卧，进入深睡状态
     }
 }
 
 TIME_OFFBED_TO_AWAKE = 120  # 离床状态，连续多少秒在床，进入清醒状态，该参数用以减少无效离床次数
-
 
 DEV_MODEL_TO_ARITH_TYPE = {
     'htjr': 'htjr',

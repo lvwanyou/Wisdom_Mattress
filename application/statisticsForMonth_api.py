@@ -17,6 +17,7 @@ import arith
 class StatisticsForMonth:
     def __init__(self, db):
         self.db = db
+
         self.analyser = Analyser(self.db)
         self.statistics = Statistics(self.db)
         self.sleep_statForMonth = {}
@@ -30,8 +31,12 @@ class StatisticsForMonth:
         self.sleep_statForMonth['score'] = [0] * int(month_range[1] + 1)  # 声明 每日得分 list的大小
         self.sleep_statForMonth['sleepTime'] = [0] * int(month_range[1] + 1)  # 声明实际睡眠时间 list的大小
         self.sleep_statForMonth['offBedFrequency'] = [0] * int(month_range[1] + 1)  # 声明 离床次数 list的大小
-        self.sleep_statForMonth['offBedTime'] = [0] * list(month_range[1] + 1)  # 声明 离床时间 list的大小
+        self.sleep_statForMonth['offBedTime'] = [[] for i in range(int(month_range[1]))]
+
+        # [0] *   # 声明 离床时间 list的大小
+        # {'offbed_time': '', 'offbed_range': ''}
         self.sleep_statForMonth['onBedTime'] = [0] * int(month_range[1] + 1)  # 声明在床时间 list 的大小
+        self.sleep_statForMonth['firstAwakeLight'] = [0] * int(month_range[1] + 1)  # 声明 入睡时间 list的大小
         self.sleep_statForMonth['deepSleepTime'] = [0] * int(month_range[1] + 1)  # 声明深睡时间 list 的大小
         self.sleep_statForMonth['heartbeat'] = [0] * int(month_range[1] + 1)  # 声明心率（次/分） list 的大小
         self.sleep_statForMonth['breath'] = [0] * int(month_range[1] + 1)  # 声明呼吸频率（次/分） list 的大小
@@ -55,7 +60,7 @@ class StatisticsForMonth:
         self.sleep_statForMonth['deepSleepTime'][day] = 0
         self.sleep_statForMonth['heartbeat'][day] = 0
         self.sleep_statForMonth['breath'][day] = 0
-
+        self.sleep_statForMonth['firstAwakeLight'][day] = 0
     #  method: 封装获取指定date的score
     #  指定day的 score  :   self.sleep_statForMonth['score'][day]
     #  指定day的 sleep_time（有效睡眠时间）:   self.sleep_statForMonth['sleep_time'][day]
@@ -64,6 +69,7 @@ class StatisticsForMonth:
     #  指定day的 deepSleepTime（深睡时间）:    self.sleep_statForMonth['deepSleepTime'][day]
     #  指定day的 heartbeat（声明心率（次/分））:    self.sleep_statForMonth['heartbeat'] [day]
     #  指定day的 breath（呼吸频率（次/分））:   self.sleep_statForMonth['breath'] [day]
+    #  指定day的 firstAwakeLight（入睡时间）:   self.sleep_statForMonth['firstAwakeLight'][day]
     def get_day_score(self, user_id, date, date_from_db):
         day = parse(date).day  # 获取参数day
 
@@ -89,6 +95,7 @@ class StatisticsForMonth:
 
         if sleep_stat_for_day.get('firstAwakeLight') is not None:
             sleep_stat_for_day['firstAwakeLight'] = sleep_stat_for_day['firstAwakeLight'] / 60
+            self.sleep_statForMonth['firstAwakeLight'][day]=sleep_stat_for_day['firstAwakeLight']
             sleep_stat_for_day['score'], sleep_stat_for_day['sleepEval'] = self.statistics.get_sleep_assess(
                 sleep_stat_for_day['offbed'],
                 sleep_stat_for_day['firstAwakeLight'],
@@ -115,7 +122,7 @@ class StatisticsForMonth:
 
     #  拿到每月中每天的睡眠的有效时间，然后再得到对应的标准差和平均值，设定正常睡眠范围
     def get_sleep_range(self):
-        sleep_range = numpy.std(self.statMonth_analyser.get_valid_sleep_times(self.sleep_statForMonth['sleepTime']),
+        sleep_range = numpy.std(self.statMonth_analyser.get_valid_values(self.sleep_statForMonth['sleepTime']),
                                 ddof=0)  # 由于样本容量较小，故用有偏标准差进行计算。
         sleep_average_time = sum(self.sleep_statForMonth['sleepTime']) / self.DaysValidity
         self.sleep_statForMonth['sleepRange'] = [0] * int(2)  # 声明 score list的大小
@@ -123,7 +130,8 @@ class StatisticsForMonth:
             self.sleep_statForMonth['sleepRange'][0] = str(sleep_average_time - sleep_range)
             self.sleep_statForMonth['sleepRange'][1] = str(sleep_average_time + sleep_range)
 
-    def on_get(self, req, resp, user_id, date):
+    # 获取月报数据
+    def get_sleep_statForMonth(self, user_id, date):
         date = parse(date)
         month_range = self.init_param(date)
         first_day = parse(str(date.year) + '-' + str(date.month) + '-01')
@@ -132,15 +140,24 @@ class StatisticsForMonth:
             node_day = first_day + timedelta(days=i)
             node_day = node_day.strftime('%Y-%m-%d')  # 格式化日期格式
             date_from_db = self.init_date_from_db(user_id, node_day)  # 初始化data_from_db
+            self.statistics.date = node_day
             self.get_day_score(user_id, node_day, date_from_db)  # 根据每一天获取每一天的score ，算出平均值，为月报的分数
+            self.sleep_statForMonth['offBedTime'][i] = self.statMonth_analyser.get_offbed_time(user_id,
+                                                                                               node_day)  # 离床时间
 
+        # 综合评分
         self.sleep_statForMonth['averScore'] = sum(self.sleep_statForMonth['score']) / self.DaysValidity  # 月报平均得分
+        # 睡眠总时间段
         self.get_sleep_range()  # 获取月睡眠时间段
 
         self.sleep_statForMonth['LargestOffBedFrequency'] = max(
-            self.sleep_statForMonth['offBedFrequency'])  # 获取最大离床次数   ###############################  error
-        self.sleep_statForMonth['AverOffBedFrequency'] = sum(self.statMonth_analyser.get_valid_sleep_times(
-            self.sleep_statForMonth['offBedFrequency'])) / self.DaysValidity  # 获取平均离床时间
+            self.sleep_statForMonth['offBedFrequency'])  # 获取最大离床次数
+        # 深夜离床次数
+        self.sleep_statForMonth['AverOffBedFrequency'] = sum(self.statMonth_analyser.get_valid_values(
+            self.sleep_statForMonth['offBedFrequency'])) / self.DaysValidity  # 获取平均离床次数
+        # 平均入睡时间
+        self.sleep_statForMonth['AverFirstAwakeLight'] = sum(self.statMonth_analyser.get_valid_values(
+            self.sleep_statForMonth['firstAwakeLight'])) / self.DaysValidity  # 获取平均离床次数
         # 睡眠效率: 实际睡眠时间和在床时间的比值  (即 (deep_sleep+ light_sleep)/(light+firstAwakeLight+deep+awake))
         self.sleep_statForMonth['sleepEfficiency'] = str(round(
             ((sum(self.sleep_statForMonth['sleepTime']) * 1.0) / (sum(
@@ -151,16 +168,16 @@ class StatisticsForMonth:
                 self.sleep_statForMonth['sleepTime']) * 1.0)), 4) * 100) + '%'
         # 平均心率
         self.sleep_statForMonth['averHeartbeat'] = sum(self.sleep_statForMonth['heartbeat']) / self.DaysValidity
-        # 呼吸频率
+        # 平均呼吸频率
         self.sleep_statForMonth['averBreath'] = sum(self.sleep_statForMonth['breath']) / self.DaysValidity
 
-        # 离床时间
-        self.sleep_statForMonth['offBedTime']
-        # 方面有问题，这里的offbed为offbed_frequency   ;算出offbedTime,完成作息规律性计算；
+        for item in self.sleep_statForMonth['offBedTime']:
+            for item_offbed in item:
+                item_offbed['offbed_time'] = item_offbed['offbed_time'].isoformat()
+        return self.sleep_statForMonth
 
-        """
-        
-        """
-        #    sleep_stat_mon = {'lv': 'wan'}
+    def on_get(self, req, resp, user_id, date):
+        self.statistics.user_id = user_id
+        self.sleep_statForMonth = self.get_sleep_statForMonth(user_id, date)
         resp.body = json.dumps(self.sleep_statForMonth)
         resp.status = falcon.HTTP_200
